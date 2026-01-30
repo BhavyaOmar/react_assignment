@@ -76,6 +76,7 @@ export default function ArtworkTable({
       first={(page - 1) * rows}
       totalRecords={totalRecords}
       loading={loading}
+      selectionMode="multiple"
       selection={selectedArtworks}
       onSelectionChange={handleSelectionChange}
       onPage={handlePageChange}
