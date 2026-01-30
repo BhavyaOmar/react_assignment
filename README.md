@@ -1,73 +1,127 @@
-# React + TypeScript + Vite
+# React Internship Assignment — Artwork Table
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript application that fetches artwork data from the Art Institute of Chicago API, renders it in a PrimeReact DataTable with server-side pagination, and supports persistent row selection across pages without preloading data.
 
-Currently, two official plugins are available:
+## Objective
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Build a frontend that:
 
-## React Compiler
+- Fetches artwork data from a public API.
+- Implements server-side pagination.
+- Allows row selection with persistence across pages.
+- Provides a custom selection panel for selecting top $n$ rows on the current page.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Core Features
 
-## Expanding the ESLint configuration
+- **PrimeReact DataTable** with checkbox selection.
+- **Server-side pagination** (fetches only the current page).
+- **Persistent selection** stored by IDs (no caching of full datasets).
+- **Custom selection overlay** to select top $n$ rows on the current page.
+- **TypeScript-first** codebase using Vite.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Tech Stack
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- React 19
+- TypeScript
+- Vite
+- PrimeReact + PrimeFlex + PrimeIcons
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Data Source
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- API: https://api.artic.edu/api/v1/artworks?page=1
+- Fields rendered in the table:
+  - `title`
+  - `place_of_origin`
+  - `artist_display`
+  - `inscriptions`
+  - `date_start`
+  - `date_end`
+
+## Project Setup
+
+### Prerequisites
+
+- Node.js 18+ (recommended)
+- npm 9+ (or a compatible package manager)
+
+### Install Dependencies
+
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Start Development Server
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
 ```
+
+### Build for Production
+
+```bash
+npm run build
+```
+
+### Preview Production Build
+
+```bash
+npm run preview
+```
+
+## How It Works
+
+### Server-Side Pagination
+
+- Pagination events from the table trigger a new API request.
+- The API is called with `page` and `limit` parameters.
+- Only the current page is stored in memory.
+
+### Persistent Selection Strategy
+
+- The app stores **only selected IDs** per page.
+- When you return to a page, selections are rehydrated using those IDs.
+- No data from other pages is prefetched or stored.
+
+### Custom Selection Overlay
+
+- The selection header includes a dropdown button.
+- You can input a number to select the top $n$ rows of the current page.
+
+## Folder Structure
+
+```
+src/
+  api/
+    artworksApi.ts
+  components/
+    ArtworkTable.tsx
+    SelectionOverlay.tsx
+  hooks/
+    useArtworks.ts
+    useArtworksSelection.ts
+    useSelectionOverlay.ts
+  types/
+    artwork.ts
+  App.tsx
+  main.tsx
+```
+
+## Key Files
+
+- [src/api/artworksApi.ts](src/api/artworksApi.ts) — API client.
+- [src/hooks/useArtworks.ts](src/hooks/useArtworks.ts) — Data fetching + pagination state.
+- [src/hooks/useArtworksSelection.ts](src/hooks/useArtworksSelection.ts) — Selection persistence by page.
+- [src/components/ArtworkTable.tsx](src/components/ArtworkTable.tsx) — DataTable + pagination UI.
+- [src/components/SelectionOverlay.tsx](src/components/SelectionOverlay.tsx) — Custom selection panel.
+
+## Notes
+
+- This submission focuses on correctness, clean state management, and avoiding data preloading.
+- PrimeReact styles are imported in [src/main.tsx](src/main.tsx).
+
+## Scripts
+
+- `npm run dev` — Start development server
+- `npm run build` — Type-check and build
+- `npm run preview` — Preview production build
+- `npm run lint` — Run ESLint

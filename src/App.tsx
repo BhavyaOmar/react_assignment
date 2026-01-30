@@ -10,17 +10,15 @@ export default function App() {
   const [page, setPage] = useState(1);
   const rows = 12;
 
-  // fetch artworks
   const { artworks, totalRecords, loading } = useArtworks(page, rows);
 
-  // selection state (by page)
   const {
+    selectedByPage,
     getSelectionsForPage,
     updateSelection,
     selectTopN,
   } = useArtworkSelection();
 
-  // overlay state
   const {
     overlayRef,
     count,
@@ -31,15 +29,21 @@ export default function App() {
 
   function handleSelectTopN(n: number) {
     if (!n || n <= 0) return;
-
-    // ONLY current page rows (important rule)
     const ids = artworks.slice(0, n).map((a) => a.id);
     selectTopN(page, ids);
     close();
   }
 
+  const totalSelected = Object.values(selectedByPage).reduce(
+    (sum, ids) => sum + ids.length,
+    0
+  );
+
   return (
     <div style={{ padding: "1rem" }}>
+      <div style={{ marginBottom: "0.5rem", fontSize: "0.95rem" }}>
+        <span style={{color:"gray"}}>Selected:</span> <span style={{color:"blue"}}>{totalSelected}</span> rows
+      </div>
       <ArtworkTable
         artworks={artworks}
         page={page}
