@@ -1,4 +1,4 @@
-import { DataTable } from 'primereact/datatable';
+import { DataTable} from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import type Artwork from '../types/artwork';
 
@@ -7,7 +7,11 @@ interface Props{
         totalRecords:number;
         rows:number;
         loading:boolean;
+        page:number;
         onPageChange: (page:number)=>void;
+        selectedByPage: Record<number, number[]>;
+        setSelectedByPage: React.Dispatch<React.SetStateAction<Record<number, number[]>>
+        >;
     }
 export default function ArtworkTable({
 
@@ -15,10 +19,55 @@ export default function ArtworkTable({
     totalRecords, 
     rows, 
     loading, 
-    onPageChange
+    page,
+    onPageChange, 
+    selectedByPage,
+    setSelectedByPage
 }:Props) {
-     return (
-       <DataTable value={artworks} paginator lazy rows ={rows} totalRecords={totalRecords} loading={loading} onPage={(x) => onPageChange(x.page + 1)} showGridlines tableStyle={{ minWidth: '50rem' }}>
+
+ 
+    const currentSelections = selectedByPage[page] || []; // Get the selections from the current page but if none, return empty array
+    
+     function onSelectionChange(e: any) {
+    const selectedRows = e.value as Artwork[];
+    const ids = selectedRows.map((art) => art.id);
+
+    setSelectedByPage((prev) => {
+      // if nothing selected → delete page key
+      if (ids.length === 0) {
+        const { [page]: _, ...rest } = prev;
+        return rest;
+      }
+
+      return {
+        ...prev,
+        [page]: ids,
+      };
+    });
+  }
+
+  function onPage(e: any) {
+    // PrimeReact pages are 0-based
+    onPageChange(e.page + 1);
+  }
+    return (
+       <DataTable 
+       value={artworks} 
+       dataKey="id"
+       paginator 
+       lazy 
+       rows ={rows} 
+       totalRecords={totalRecords} 
+       loading={loading} 
+       selectionMode="checkbox"
+       selection={artworks.filter((art) =>
+        currentSelections.includes(art.id)
+      )}
+      onSelectionChange={onSelectionChange}
+      onPage={onPage}
+      showGridlines 
+       tableStyle={{ minWidth: '50rem' }}>
+                <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
                 <Column field="title" header="Title"></Column>
                 <Column field="place_of_origin" header="Origin"></Column>
                 <Column field="artist_display" header="Artist"></Column>
