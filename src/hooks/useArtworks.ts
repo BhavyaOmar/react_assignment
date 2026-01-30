@@ -31,7 +31,7 @@ export function useArtworks(page: number ,rows:number){
     }, [page,rows]);
 
     return{
-        artworks,
+    artworks,
     totalRecords,
     loading
     }

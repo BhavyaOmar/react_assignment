@@ -1,37 +1,64 @@
 import { useState } from "react";
 import ArtworkTable from "./components/ArtworkTable";
-import { useArtworks } from './hooks/useArtworks';
+import SelectionOverlay from "./components/SelectionOverlay";
 
-export default function App() { 
-  
-  // PrimeReact pages are 1-based in our app
+import { useArtworks } from "./hooks/useArtworks";
+import { useArtworkSelection } from "./hooks/useArtworksSelection";
+import { useSelectionOverlay } from "./hooks/useSelectionOverlay";
+
+export default function App() {
   const [page, setPage] = useState(1);
-
-  // fixed rows per assignment requirement
   const rows = 12;
 
-  // data hook
+  // fetch artworks
   const { artworks, totalRecords, loading } = useArtworks(page, rows);
 
-  // checkbox selections stored page-wise
-  const [selectedByPage, setSelectedByPage] = useState<
-    Record<number, number[]>
-  >({});
+  // selection state (by page)
+  const {
+    getSelectionsForPage,
+    updateSelection,
+    selectTopN,
+  } = useArtworkSelection();
+
+  // overlay state
+  const {
+    overlayRef,
+    count,
+    setCount,
+    open,
+    close,
+  } = useSelectionOverlay();
+
+  function handleSelectTopN(n: number) {
+    if (!n || n <= 0) return;
+
+    // ONLY current page rows (important rule)
+    const ids = artworks.slice(0, n).map((a) => a.id);
+    selectTopN(page, ids);
+    close();
+  }
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h2>Artworks</h2>
-
+    <div style={{ padding: "1rem" }}>
       <ArtworkTable
         artworks={artworks}
-        totalRecords={totalRecords}
-        rows={rows}
-        loading={loading}
-        onPageChange={setPage}
         page={page}
-        selectedByPage={selectedByPage}
-        setSelectedByPage={setSelectedByPage}
+        rows={rows}
+        totalRecords={totalRecords}
+        loading={loading}
+        selectedIds={getSelectionsForPage(page)}
+        onSelectionChange={(ids) => updateSelection(page, ids)}
+        onPageChange={setPage}
+        onOpenOverlay={open}
+      />
+
+      <SelectionOverlay
+        overlayRef={overlayRef}
+        count={count}
+        setCount={setCount}
+        onConfirm={handleSelectTopN}
+        onClose={close}
       />
     </div>
-  )
+  );
 }
